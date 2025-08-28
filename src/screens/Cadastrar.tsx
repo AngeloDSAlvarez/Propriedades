@@ -33,7 +33,7 @@ export const Login = () => {
         style={styles.inputLogin}
       />
       <TouchableOpacity onPress={handleLogin} style={styles.submitLogin}>
-        <Text>ENTRAR</Text>
+        <Text>Cadastrar</Text>
       </TouchableOpacity>
     </View>
   );

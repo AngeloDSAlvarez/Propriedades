@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "localidade",
-    "slug": "localidade",
+    "name": "Propriedades",
+    "slug": "propriedades",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

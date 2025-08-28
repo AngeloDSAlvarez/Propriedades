@@ -1,66 +1,77 @@
-import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  User,
+} from "firebase/auth";
+import { getReactNativePersistence } from "@firebase/auth-react-native";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { auth } from "../config/firebase";
 
-// 1Define os tipos para o contexto
-interface AuthContextType {
-  userToken: string | null;
-  isLoading: boolean;
-  login: (login: string, senha: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-// Cria o contexto com tipo
-export const AuthContext = createContext<AuthContextType>({
-  userToken: null,
-  isLoading: true,
-  login: async () => {},
-  logout: async () => {},
+// Instância global do Axios
+export const api = axios.create({
+  baseURL: "http://192.168.0.10:3000", // Sua API Node
 });
 
-// Define tipo dos filhos do provider
-interface AuthProviderProps {
-  children: ReactNode;
+interface AuthContextData {
+  usuario: User | null;
+  logar: (email: string, senha: string) => Promise<void>;
+  cadastrar: (email: string, senha: string) => Promise<void>;
+  deslogar: () => Promise<void>;
 }
 
-// Implementa o provider
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [userToken, setUserToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-  const [loginAut, setLoginAut] = useState("Angelo");
-  const [senhaAut, setSenhaAut] = useState("Ang22");
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [usuario, setUsuario] = useState<User | null>(null);
 
-  const login = async (login: string, senha: string) => {
+  async function logar(email: string, senha: string) {
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, senha);
+      setUsuario(cred.user);
 
-    if (login == loginAut && senha == senhaAut) {
-        setUserToken(login);
-        await AsyncStorage.setItem('userToken', login);
-    } else {
-        return alert("Erro ao entrar, verifique credenciais");
+      // Pega o token JWT
+      const token = await cred.user.getIdToken();
+
+      // Configura Axios para enviar token em todas as requisições
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } catch (error: any) {
+      throw new Error(error.message);
     }
-  };
+  }
 
-  const logout = async () => {
-    setUserToken(null);
-    await AsyncStorage.removeItem('userToken');
-  };
+  async function cadastrar(email: string, senha: string) {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, senha);
+      setUsuario(cred.user);
 
-  const checkLoginStatus = async () => {
-    const token = await AsyncStorage.getItem('userToken');
-    setUserToken(token);
-    setIsLoading(false);
-  };
+      // Pega o token JWT
+      const token = await cred.user.getIdToken();
 
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
+      // Configura Axios para enviar token em todas as requisições
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  async function deslogar() {
+    try {
+      await signOut(auth);
+      setUsuario(null);
+      delete api.defaults.headers.common["Authorization"]; // Remove token do Axios
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{ userToken, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ usuario, logar, cadastrar, deslogar }}>
       {children}
     </AuthContext.Provider>
   );
-
-  
 };
+
 export const useAuth = () => useContext(AuthContext);

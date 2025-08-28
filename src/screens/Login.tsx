@@ -1,19 +1,55 @@
-import React from 'react';
-import { View, Button, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, Button, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
-  const { login } = useAuth();
+    const { login } = useAuth();
 
-  const handleLogin = () => {
-    // Simula um token de login
-    login('Angelo', "Ang22");
-  };
+    const [usuario, setUsuario] = useState('');
+    const [senha, setSenha] = useState('');
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Login</Text>
-      <Button title="Entrar" onPress={handleLogin} />
-    </View>
-  );
+    const handleLogin = () => {
+        login(usuario, senha);
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text>Login</Text>
+            <TextInput
+                value={usuario}
+                onChangeText={setUsuario}
+                style={styles.inputLogin}
+            />
+            <TextInput
+                value={senha}
+                onChangeText={setSenha}
+                style={styles.inputLogin}                
+            />
+            <TouchableOpacity
+            onPress={handleLogin}
+            style={styles.submitLogin}
+            >
+                <Text>ENTRAR</Text>
+            </TouchableOpacity>
+        </View>
+    );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+    },
+    inputLogin: {
+        width: 200,
+        borderColor: "#000",
+        borderWidth: 1,
+        borderRadius: 10,
+        paddingHorizontal: 10
+    },
+    submitLogin: {
+        backgroundColor: "#",
+    }
+})

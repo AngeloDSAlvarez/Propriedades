@@ -18,7 +18,7 @@ export const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      {userToken ? <AppTabs /> : <AuthStack />}
+      {!userToken ? <AppTabs /> : <AuthStack />}
     </NavigationContainer>
   );
 };

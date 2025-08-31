@@ -32,8 +32,10 @@ export const Login = () => {
       keyboardVerticalOffset={Platform.select({ ios: 0, android: 20 })}
       enabled
     >
-      <View>
-        <Text style={{ fontSize: 24, color: "#00592d", marginBottom: 20 }}>Login</Text>
+      <View style={{ width: "100%", alignItems: "center", gap: 15 }}>
+        <Text style={{ fontSize: 24, color: "#00592d", marginBottom: 20 }}>
+          Entre no Propriedades
+        </Text>
 
         <View style={styles.containerInput}>
           <Text style={styles.textInput}>Login</Text>
@@ -42,7 +44,7 @@ export const Login = () => {
             onChangeText={setUsuario}
             value={usuario}
             autoCapitalize="none"
-            textAlignVertical='bottom'
+            textAlignVertical="bottom"
           />
         </View>
         <View style={styles.containerSenha}>
@@ -53,9 +55,8 @@ export const Login = () => {
             value={senha}
             secureTextEntry={!mostrarSenha}
             onSubmitEditing={handleLogin}
-            textAlignVertical='bottom'
+            textAlignVertical="bottom"
             autoCapitalize="none"
-
           />
           <TouchableOpacity
             style={styles.icon}
@@ -73,10 +74,9 @@ export const Login = () => {
         <TouchableOpacity onPress={handleLogin} style={styles.submit}>
           <Text style={styles.submitText}>ENTRAR</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Cadastrar')}>
+        <TouchableOpacity onPress={() => navigation.navigate("Cadastrar")}>
           <Text style={styles.linkText}>Não possui uma conta ainda?</Text>
         </TouchableOpacity>
-
       </View>
     </KeyboardAvoidingView>
   );

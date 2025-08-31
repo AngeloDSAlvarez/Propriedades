@@ -4,56 +4,49 @@ import {
   Button,
   Text,
   TextInput,
-  StyleSheet,
+  Platform,
   TouchableOpacity,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import styles from "./CadastrarStyles";
 
-export const Login = () => {
-  const { logar } = useAuth();
+export const Cadastrar = () => {
+  const { cadastrar } = useAuth();
 
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
 
-  const handleLogin = () => {
-    logar(usuario, senha);
+  const handleCadastro = () => {
+    cadastrar(usuario, senha);
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Login</Text>
+   <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.select({ ios: 0, android: 20 })}
+      enabled
+    >
+      <Text style={{ fontSize: 24, color: "#00592d", marginBottom: 20 }}>Cadastre-se</Text>
       <TextInput
         value={usuario}
         onChangeText={setUsuario}
-        style={styles.inputLogin}
+        style={styles.input}
+        placeholder="Usuário"
+        placeholderTextColor="#666"
       />
       <TextInput
         value={senha}
         onChangeText={setSenha}
-        style={styles.inputLogin}
+        style={styles.input}
+        placeholder="Senha"
+        placeholderTextColor="#666"
+        secureTextEntry
       />
-      <TouchableOpacity onPress={handleLogin} style={styles.submitLogin}>
-        <Text>Cadastrar</Text>
+      <TouchableOpacity onPress={handleCadastro} style={styles.submit}>
+        <Text style={styles.submitText}>ENTRAR</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  inputLogin: {
-    width: 200,
-    borderColor: "#000",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-  },
-  submitLogin: {
-    backgroundColor: "#",
-  },
-});

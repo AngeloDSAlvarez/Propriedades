@@ -5,7 +5,10 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { getReactNativePersistence } from "@firebase/auth-react-native";
+import { getAuth, 
+  initializeAuth,
+  //@ts-ignore  
+  getReactNativePersistence } from 'firebase/auth';
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { auth } from "../config/firebase";
@@ -34,7 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Pega o token JWT
       const token = await cred.user.getIdToken();
-
       // Configura Axios para enviar token em todas as requisições
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } catch (error: any) {

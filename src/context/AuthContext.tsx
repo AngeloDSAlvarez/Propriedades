@@ -1,25 +1,28 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   User,
+  onAuthStateChanged,
 } from "firebase/auth";
-import { getAuth, 
-  initializeAuth,
-  //@ts-ignore  
-  getReactNativePersistence } from 'firebase/auth';
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { auth } from "../config/firebase";
 
 // Instância global do Axios
 export const api = axios.create({
-  baseURL: "http://192.168.0.10:3000", // Sua API Node
+  baseURL: "http://10.0.2.2:3000", // API
 });
 
 interface AuthContextData {
   usuario: User | null;
+  loading: boolean;
   logar: (email: string, senha: string) => Promise<void>;
   cadastrar: (email: string, senha: string) => Promise<void>;
   deslogar: () => Promise<void>;
@@ -29,16 +32,32 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Monitora o estado de autenticação do Firebase
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUsuario(user);
+      if (user) {
+        // Esta função vai ser chamada tanto no login quanto na renovação do token!
+        try {
+          const token = await user.getIdToken();
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        } catch (error) {
+          console.error("Erro ao obter o token:", error);
+        }
+      } else {
+        delete api.defaults.headers.common["Authorization"];
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   async function logar(email: string, senha: string) {
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, senha);
-      setUsuario(cred.user);
-
-      // Pega o token JWT
-      const token = await cred.user.getIdToken();
-      // Configura Axios para enviar token em todas as requisições
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      await signInWithEmailAndPassword(auth, email, senha);
+      // O `onAuthStateChanged` vai atualizar o estado do `usuario`
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -46,14 +65,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   async function cadastrar(email: string, senha: string) {
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, senha);
-      setUsuario(cred.user);
-
-      // Pega o token JWT
-      const token = await cred.user.getIdToken();
-
-      // Configura Axios para enviar token em todas as requisições
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      await createUserWithEmailAndPassword(auth, email, senha);
+      // O `onAuthStateChanged` vai atualizar o estado do `usuario`
     } catch (error: any) {
       throw new Error(error.message);
     }
@@ -62,15 +75,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   async function deslogar() {
     try {
       await signOut(auth);
-      setUsuario(null);
-      delete api.defaults.headers.common["Authorization"]; // Remove token do Axios
+      // O `onAuthStateChanged` vai atualizar o estado do `usuario` para `null`
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
 
   return (
-    <AuthContext.Provider value={{ usuario, logar, cadastrar, deslogar }}>
+    <AuthContext.Provider
+      value={{ usuario, loading, logar, cadastrar, deslogar }}
+    >
       {children}
     </AuthContext.Provider>
   );

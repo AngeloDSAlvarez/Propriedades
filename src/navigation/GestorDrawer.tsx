@@ -1,4 +1,5 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 import { Gestor } from "../screens/AreaGestor/Gestor";
 import { GestorAnimal } from "../screens/AreaGestor/GestorAnimal";
@@ -18,7 +19,21 @@ export const GestorDrawer = () => {
       <Drawer.Screen
         name="GestaoLeite"
         component={LeiteGestorStack}
-        options={{}}
+        options={({ route }) => {
+          // Pega o nome da rota focada dentro da pilha de navegação aninhada (LeiteGestorStack)
+          const routeName = getFocusedRouteNameFromRoute(route);
+
+          if (
+            routeName === "LeiteAdicionarColeta" ||
+            routeName === "LeiteEditarColeta" ||
+            routeName === "GerarRelatorio"
+          ) {
+            return { headerShown: false };
+          } else {
+            // Para as outras rotas, como LeiteHome, o header do Drawer fica visível
+            return { headerShown: true };
+          }
+        }}
       />
     </Drawer.Navigator>
   );

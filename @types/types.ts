@@ -1,6 +1,9 @@
 export type ColetaLeite = {
-    id: string,
-    quantidade: Number,
-    data: string,
-}
+  id: string;
+  data: string;
+  quantidade: string;
+  preco: string;
+  dataAtualizacao: string;
+  dataCriacao: string;
+};
 // celulas somaticas
